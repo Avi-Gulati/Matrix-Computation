@@ -156,6 +156,18 @@ int** strassen(int** A, int** B, int n, int n0) {
         }
     }
 
+    // delete intermediate matrices
+    matrix_del(p1, ndiv_2);
+    matrix_del(p2, ndiv_2);
+    matrix_del(p3, ndiv_2);
+    matrix_del(p4, ndiv_2);
+    matrix_del(p5, ndiv_2);
+    matrix_del(p6, ndiv_2);
+    matrix_del(p7, ndiv_2);
+    matrix_del(c11, ndiv_2);
+    matrix_del(c12, ndiv_2);
+    matrix_del(c21, ndiv_2);
+    matrix_del(c22, ndiv_2);
     return C;
 }
 
