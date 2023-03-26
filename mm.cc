@@ -4,24 +4,34 @@
 
 using namespace std;
 
-
-// returns dot product of two equal length arrays
-int dot_product(int* u, int* v, int n) {
-    int sum = 0;
-    for (int i = 0; i < n; i++) {
-        sum += u[i] * v[i];
-    }
-    return sum;
+void matrix_del(int** A, int n) {
+    for(size_t i = 0; i < n; i++)
+        delete A[i];
+    delete A;
 }
 
-// standard matrix multiplication algorithm
-int** standard(int** A, int** B, int n) {
-    int** product = new int*[n];
-    for(size_t i = 0; i < n; ++i)
-        product[i] = new int[n];
+// prints matrix
+void print_matrix(int** matrix, int k, int n) {
+    printf("matrix %i:\n", k);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            product[i][j] = dot_product(A[i], B[j], n);
+            cout << matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int** standard(int** A, int** B, int n) {
+    int** product = new int*[n];
+    for(size_t i = 0; i < n; i++)
+        product[i] = new int[n];
+    // compute products
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            product[i][j] = 0;
+            for (int k = 0; k < n; k++) {
+                product[i][j] += A[i][k] * B[k][j];
+            }
         }
     }
     return product;
@@ -29,38 +39,40 @@ int** standard(int** A, int** B, int n) {
 
 int** matrix_addition(int** A, int** B, size_t n) {
     
-    int** commputation = new int*[n];
-    for(size_t i = 0; i < n; ++i)
-        commputation[i] = new int[n];
+    int** sum = new int*[n];
+    for(size_t i = 0; i < n; i++)
+        sum[i] = new int[n];
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            product[i][j] = A[i][j] + B[i][j];
+            sum[i][j] = A[i][j] + B[i][j];
         }
     }
+    return sum;
 }
 
 int** matrix_subtraction(int** A, int** B, size_t n) {
-    
-    int** commputation = new int*[n];
-    for(size_t i = 0; i < n; ++i)
-        commputation[i] = new int[n];
+
+    int** difference = new int*[n];
+    for(size_t i = 0; i < n; i++)
+        difference[i] = new int[n];
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            product[i][j] = A[i][j] - B[i][j];
+            difference[i][j] = A[i][j] - B[i][j];
         }
     }
+    return difference;
 }
 
-int** strassen(int** A, int** B, int n0) {
+int** strassen(int** A, int** B, int n, int n0) {
 
-    size_t n = sizeof(A[1]) / sizeof(int) // Get the dimensions of A and B at this point  
-    if (n == n0) {
-        return standard(A, B, n0);
+    // changed it so "n" is a function argument and doesn't need to be computed
+    if (n <= n0) { // replaced "==" with "<="
+        return standard(A, B, n);
     }
     
-    size_t ndiv_2 = n/2
+    size_t ndiv_2 = n / 2;
     int** a = new int*[ndiv_2];            // Creating the different spliced arrays 
     int** b = new int*[ndiv_2];
     int** c = new int*[ndiv_2];
@@ -71,7 +83,7 @@ int** strassen(int** A, int** B, int n0) {
     int** g = new int*[ndiv_2];
     int** h = new int*[ndiv_2];
 
-    for (size_t i = 0; i < ndiv_2; ++i)  // Dynamically allocate memory for array of integers with ndiv_2 elements 
+    for (size_t i = 0; i < ndiv_2; i++) { // Dynamically allocate memory for array of integers with ndiv_2 elements 
         a[i] = new int[ndiv_2];          // for each spliced array
         b[i] = new int[ndiv_2];
         c[i] = new int[ndiv_2];
@@ -81,49 +93,46 @@ int** strassen(int** A, int** B, int n0) {
         f[i] = new int[ndiv_2];
         g[i] = new int[ndiv_2];
         h[i] = new int[ndiv_2];
+    }
 
-
-    for (size_t i = 0; i < ndiv_2; i++) {   // The next four for loops assign the spliced arrays to the 
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
         for (size_t j = 0; j < ndiv_2; j++) { // correct values 
             a[i][j] = A[i][j];
             e[i][j] = B[i][j];
         }
-    }
-    for (size_t i = 0; i < ndiv_2; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
             b[i][j-ndiv_2] = A[i][j];
             f[i][j-ndiv_2] = B[i][j];
         }
     }
+
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = 0; j < ndiv_2; j++) {
             c[i-ndiv_2][j] = A[i][j];
             g[i-ndiv_2][j] = B[i][j];
         }
-    }
-    for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
             d[i-ndiv_2][j-ndiv_2] = A[i][j];
             h[i-ndiv_2][j-ndiv_2] = B[i][j];
         }
     }
 
-    int** p1 = strassen(matrix_addition(a,d,ndiv_2), matrix_addition(e,h,ndiv_2));
-    int** p2 = strassen(d, matrix_subtraction(g,e,ndiv_2));
-    int** p3 = strassen(matrix_addition(a,b,ndiv_2), h);
-    int** p4 = strassen(matrix_subtraction(b,d,ndiv_2), matrix_addition(g,h,ndiv_2));
-    int** p5 = strassen(a, matrix_subtraction(f,h,ndiv_2));
-    int** p6 = strassen(matrix_addition(c,d,ndiv_2), e);
-    int** p7 = strassen(matrix_subtraction(a,c,ndiv_2), matrix_addition(e,f,ndiv_2));
+    // labeling convention following the lecture 9 notes
+    int** p1 = strassen(a, matrix_subtraction(f,h,ndiv_2), ndiv_2, 1);
+    int** p2 = strassen(matrix_addition(a,b,ndiv_2), h, ndiv_2, 1);
+    int** p3 = strassen(matrix_addition(c,d,ndiv_2), e, ndiv_2, 1);
+    int** p4 = strassen(d, matrix_subtraction(g,e,ndiv_2), ndiv_2, 1);
+    int** p5 = strassen(matrix_addition(a,d,ndiv_2), matrix_addition(e,h,ndiv_2), ndiv_2, 1);
+    int** p6 = strassen(matrix_subtraction(b,d,ndiv_2), matrix_addition(g,h,ndiv_2), ndiv_2, 1);
+    int** p7 = strassen(matrix_subtraction(c,a,ndiv_2), matrix_addition(e,f,ndiv_2), ndiv_2, 1);
 
-
-    int** c11 = matrix_addition(matrix_subtraction(matrix_addition(p1, p2,ndiv_2), p3), p4);
-    int** c12 = matrix_addition(p3, p5, ndiv_2);
-    int** c21 = matrix_addition(p6, p2, ndiv_2);
-    int** c22 = matrix_subtraction(matrix_subtraction(matrix_addition(p5, p1,ndiv_2), p6), p7);
+    int** c11 = matrix_addition(matrix_addition(matrix_subtraction(p4, p2, ndiv_2), p5, ndiv_2), p6, ndiv_2);
+    int** c12 = matrix_addition(p1, p2, ndiv_2);
+    int** c21 = matrix_addition(p3, p4, ndiv_2);
+    int** c22 = matrix_addition(matrix_addition(matrix_subtraction(p1, p3, ndiv_2), p5, ndiv_2), p7, ndiv_2);
 
     int** C = new int*[n];
-    for(size_t i = 0; i < n; ++i)
+    for(size_t i = 0; i < n; i++)
         C[i] = new int[n];
 
     for (size_t i = 0; i < ndiv_2; i++) {   // The next four for loops assign the spliced arrays to the 
@@ -138,7 +147,7 @@ int** strassen(int** A, int** B, int n0) {
     }
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = 0; j < ndiv_2; j++) {
-            C[i][j] = c21[i-ndiv_2][j-];
+            C[i][j] = c21[i-ndiv_2][j];
         }
     }
     for (size_t i = ndiv_2; i < n; i++) {
@@ -148,17 +157,6 @@ int** strassen(int** A, int** B, int n0) {
     }
 
     return C;
-}
-
-// prints matrix
-void print_matrix(int** matrix, int k, int n) {
-    printf("matrix %i:\n", k);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            cout << matrix[i][j] << " ";
-        }
-        cout << endl;
-    }
 }
 
 // ./mm 0 dimension inputfile
@@ -171,45 +169,42 @@ int main(int _argc, char *argv[]) {
     
     // representation: matrix1[i][j] == ith row, jth column
     int** matrix1 = new int*[N]; // each element is a pointer to an array.
-    for(size_t i = 0; i < N; ++i)
+    for(size_t i = 0; i < N; i++)
         matrix1[i] = new int[N]; // build rows
-    for(size_t i = 0; i < N; ++i)
+    for(size_t i = 0; i < N; i++)
     {
-        for(size_t j = 0; j < N; ++j)
+        for(size_t j = 0; j < N; j++)
         {
             string val;
             getline(matrices, val);
             matrix1[i][j] = stoi(val);
         }
     }
-    // representation: matrix2[i][j] == jth row, ith column (tranpose, that way standard mutltiplication is easier)
+    // representation: matrix2[i][j] == ith row, jth column
     int** matrix2 = new int*[N]; // each element is a pointer to an array.
-    for(size_t i = 0; i < N; ++i)
+    for(size_t i = 0; i < N; i++)
         matrix2[i] = new int[N]; // build rows
-    for(size_t i = 0; i < N; ++i)
+    for(size_t i = 0; i < N; i++)
     {
-        for(size_t j = 0; j < N; ++j)
+        for(size_t j = 0; j < N; j++)
         {
             string val;
             getline(matrices, val);
-            matrix2[j][i] = stoi(val);
+            matrix2[i][j] = stoi(val);
         }
     }
 
     // print matrices
     print_matrix(matrix1, 1, N);
     print_matrix(matrix2, 2, N);
-    int** product = standard(matrix1, matrix2, N);
-    print_matrix(product, 3, N);
+    int** product1 = standard(matrix1, matrix2, N);
+    int** product2 = strassen(matrix1, matrix2, N, 1);
+    print_matrix(product1, 3, N);
+    print_matrix(product2, 4, N);
 
     // delete matrices
-    for(size_t i = 0; i < N; ++i)
-        delete matrix1[i];
-    delete matrix1;
-    for(size_t i = 0; i < N; ++i)
-        delete matrix2[i];
-    delete matrix2;
-    for(size_t i = 0; i < N; ++i)
-        delete product[i];
-    delete product;        
+    matrix_del(matrix1, N);
+    matrix_del(matrix2, N);
+    matrix_del(product1, N);
+    matrix_del(product2, N);      
 }
