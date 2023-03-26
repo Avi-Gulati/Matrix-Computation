@@ -91,20 +91,20 @@ int** strassen(int** A, int** B, int n0) {
     }
     for (size_t i = 0; i < ndiv_2; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
-            b[i][j] = A[i][j];
-            f[i][j] = B[i][j];
+            b[i][j-ndiv_2] = A[i][j];
+            f[i][j-ndiv_2] = B[i][j];
         }
     }
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = 0; j < ndiv_2; j++) {
-            c[i][j] = A[i][j];
-            g[i][j] = B[i][j];
+            c[i-ndiv_2][j] = A[i][j];
+            g[i-ndiv_2][j] = B[i][j];
         }
     }
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
-            d[i][j] = A[i][j];
-            h[i][j] = B[i][j];
+            d[i-ndiv_2][j-ndiv_2] = A[i][j];
+            h[i-ndiv_2][j-ndiv_2] = B[i][j];
         }
     }
 
@@ -138,12 +138,12 @@ int** strassen(int** A, int** B, int n0) {
     }
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = 0; j < ndiv_2; j++) {
-            C[i][j] = c21[i-ndiv_2][j];
+            C[i][j] = c21[i-ndiv_2][j-];
         }
     }
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
-            C[i][j] = c22[i][j-ndiv_2];
+            C[i][j] = c22[i-ndiv_2][j-ndiv_2];
         }
     }
 
