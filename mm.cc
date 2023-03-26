@@ -108,19 +108,19 @@ int** strassen(int** A, int** B, int n0) {
         }
     }
 
-    p1 = strassen(matrix_addition(a,d,ndiv_2), matrix_addition(e,h,ndiv_2));
-    p2 = strassen(d, matrix_subtraction(g,e,ndiv_2));
-    p3 = strassen(matrix_addition(a,b,ndiv_2), h);
-    p4 = strassen(matrix_subtraction(b,d,ndiv_2), matrix_addition(g,h,ndiv_2));
-    p5 = strassen(a, matrix_subtraction(f,h,ndiv_2));
-    p6 = strassen(matrix_addition(c,d,ndiv_2), e);
-    p7 = strassen(matrix_subtraction(a,c,ndiv_2), matrix_addition(e,f,ndiv_2));
+    int** p1 = strassen(matrix_addition(a,d,ndiv_2), matrix_addition(e,h,ndiv_2));
+    int** p2 = strassen(d, matrix_subtraction(g,e,ndiv_2));
+    int** p3 = strassen(matrix_addition(a,b,ndiv_2), h);
+    int** p4 = strassen(matrix_subtraction(b,d,ndiv_2), matrix_addition(g,h,ndiv_2));
+    int** p5 = strassen(a, matrix_subtraction(f,h,ndiv_2));
+    int** p6 = strassen(matrix_addition(c,d,ndiv_2), e);
+    int** p7 = strassen(matrix_subtraction(a,c,ndiv_2), matrix_addition(e,f,ndiv_2));
 
 
-    c11 = matrix_addition(matrix_subtraction(matrix_addition(p1, p2,ndiv_2), p3), p4);
-    c12 = matrix_addition(p3, p5, ndiv_2);
-    c21 = matrix_addition(p6, p2, ndiv_2);
-    c22 = matrix_subtraction(matrix_subtraction(matrix_addition(p5, p1,ndiv_2), p6), p7);
+    int** c11 = matrix_addition(matrix_subtraction(matrix_addition(p1, p2,ndiv_2), p3), p4);
+    int** c12 = matrix_addition(p3, p5, ndiv_2);
+    int** c21 = matrix_addition(p6, p2, ndiv_2);
+    int** c22 = matrix_subtraction(matrix_subtraction(matrix_addition(p5, p1,ndiv_2), p6), p7);
 
     int** C = new int*[n];
     for(size_t i = 0; i < n; ++i)
