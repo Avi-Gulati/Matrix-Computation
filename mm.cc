@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 
+
 using namespace std;
 
 void matrix_del(int** A, int n) {
@@ -67,7 +68,7 @@ int** matrix_subtraction(int** A, int** B, size_t n) {
 
 int** strassen(int** A, int** B, int n, int n0) {
 
-    // changed it so "n" is a function argument and doesn't need to be computed
+    // changed it so "n" is a function argument and doesn't need to be computedx
     if (n <= n0) { // replaced "==" with "<="
         return standard(A, B, n);
     }
@@ -171,45 +172,81 @@ int** strassen(int** A, int** B, int n, int n0) {
     return C;
 }
 
+// We used this helper function after looking at a Geeksforgeeks.org tutorial. 
+// We attribute credit to Geeksforgeeks. 
+bool isPowerOfTwo(int n) {
+    return (ceil(log2(n)) == floor(log2(n)));
+}
+// Also taken online from includehelp.com. We use bitshifting to find the next power of 2 of a number. 
+int  computeNextPowerOfTwo( int  n )
+{
+	// Result is intialized as 1
+	int value = 1;
+	// The following while loop will run until we 
+	// get a number greater than n
+	while(value<=n)
+	{
+		// value will be left shifted by 1 place in each iteration
+		value=value << 1;
+	}
+	return value ;
+}
+
 // ./mm 0 dimension inputfile
 int main(int _argc, char *argv[]) {
     int mode = stoi(argv[1]);
     const int N = stoi(argv[2]);
     
+    int nextPowerOfTwo = N;  // initialized as N if N is already a power of 2. 
+    if (!isPowerOfTwo(N)) {
+        nextPowerOfTwo = computeNextPowerOfTwo(N);
+    }
+    
     // initialize matrices (array of arrays)
     ifstream matrices(argv[3]);
     
     // representation: matrix1[i][j] == ith row, jth column
-    int** matrix1 = new int*[N]; // each element is a pointer to an array.
-    for(size_t i = 0; i < N; i++)
-        matrix1[i] = new int[N]; // build rows
-    for(size_t i = 0; i < N; i++)
+    int** matrix1 = new int*[nextPowerOfTwo]; // each element is a pointer to an array.
+    for(size_t i = 0; i < nextPowerOfTwo; i++)
+        matrix1[i] = new int[nextPowerOfTwo]; // build rows
+    for(size_t i = 0; i < nextPowerOfTwo; i++)
     {
-        for(size_t j = 0; j < N; j++)
+        for(size_t j = 0; j < nextPowerOfTwo; j++)
         {
-            string val;
-            getline(matrices, val);
-            matrix1[i][j] = stoi(val);
+            if (i < N && j < N) {
+                string val;
+                getline(matrices, val);
+                matrix1[i][j] = stoi(val);
+            }
+            else {
+                matrix1[i][j] = 0;
+            }
+            
         }
     }
     // representation: matrix2[i][j] == ith row, jth column
-    int** matrix2 = new int*[N]; // each element is a pointer to an array.
-    for(size_t i = 0; i < N; i++)
-        matrix2[i] = new int[N]; // build rows
-    for(size_t i = 0; i < N; i++)
+    int** matrix2 = new int*[nextPowerOfTwo]; // each element is a pointer to an array.
+    for(size_t i = 0; i < nextPowerOfTwo; i++)
+        matrix2[i] = new int[nextPowerOfTwo]; // build rows
+    for(size_t i = 0; i < nextPowerOfTwo; i++)
     {
-        for(size_t j = 0; j < N; j++)
+        for(size_t j = 0; j < nextPowerOfTwo; j++)
         {
-            string val;
-            getline(matrices, val);
-            matrix2[i][j] = stoi(val);
+            if (i < N && j < N) {
+                string val;
+                getline(matrices, val);
+                matrix2[i][j] = stoi(val);
+            }
+            else {
+                matrix2[i][j] = 0;
+            }
         }
     }
 
     // print matrices
     print_matrix(matrix1, 1, N);
     print_matrix(matrix2, 2, N);
-    int** product1 = standard(matrix1, matrix2, N);
+    int** product1 = standard(matrix1, matrix2, N); // Commented out because the autograder does not do anything standard 
     int** product2 = strassen(matrix1, matrix2, N, 1);
     print_matrix(product1, 3, N);
     print_matrix(product2, 4, N);
