@@ -126,33 +126,24 @@ int** strassen(int** A, int** B, int n, int n0) {
     int** p6 = strassen(matrix_subtraction(b,d,ndiv_2), matrix_addition(g,h,ndiv_2), ndiv_2, 1);
     int** p7 = strassen(matrix_subtraction(c,a,ndiv_2), matrix_addition(e,f,ndiv_2), ndiv_2, 1);
 
-    int** c11 = matrix_addition(matrix_addition(matrix_subtraction(p4, p2, ndiv_2), p5, ndiv_2), p6, ndiv_2);
-    int** c12 = matrix_addition(p1, p2, ndiv_2);
-    int** c21 = matrix_addition(p3, p4, ndiv_2);
-    int** c22 = matrix_addition(matrix_addition(matrix_subtraction(p1, p3, ndiv_2), p5, ndiv_2), p7, ndiv_2);
-
     int** C = new int*[n];
     for(size_t i = 0; i < n; i++)
         C[i] = new int[n];
 
-    for (size_t i = 0; i < ndiv_2; i++) {   // The next four for loops assign the spliced arrays to the 
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
         for (size_t j = 0; j < ndiv_2; j++) { // correct values 
-            C[i][j] = c11[i][j];
+            C[i][j] = p4[i][j] - p2[i][j] + p5[i][j] + p6[i][j];
         }
-    }
-    for (size_t i = 0; i < ndiv_2; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
-            C[i][j] = c12[i][j-ndiv_2];
+            C[i][j] = p1[i][j-ndiv_2] + p2[i][j-ndiv_2];
         }
     }
     for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = 0; j < ndiv_2; j++) {
-            C[i][j] = c21[i-ndiv_2][j];
+            C[i][j] = p3[i-ndiv_2][j] + p4[i-ndiv_2][j];
         }
-    }
-    for (size_t i = ndiv_2; i < n; i++) {
         for (size_t j = ndiv_2; j < n; j++) {
-            C[i][j] = c22[i-ndiv_2][j-ndiv_2];
+            C[i][j] = p1[i-ndiv_2][j-ndiv_2] - p3[i-ndiv_2][j-ndiv_2] + p5[i-ndiv_2][j-ndiv_2] + p7[i-ndiv_2][j-ndiv_2];
         }
     }
 
@@ -164,10 +155,6 @@ int** strassen(int** A, int** B, int n, int n0) {
     matrix_del(p5, ndiv_2);
     matrix_del(p6, ndiv_2);
     matrix_del(p7, ndiv_2);
-    matrix_del(c11, ndiv_2);
-    matrix_del(c12, ndiv_2);
-    matrix_del(c21, ndiv_2);
-    matrix_del(c22, ndiv_2);
     return C;
 }
 
