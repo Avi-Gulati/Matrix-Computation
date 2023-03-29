@@ -119,30 +119,30 @@ int** strassen(int** A, int** B, int n, int n0) {
     }
 
     int** temp1 = matrix_subtraction(f,h,padding);
-    int** p1 = strassen(a, temp1, padding, 1);
+    int** p1 = strassen(a, temp1, padding, n0);
     matrix_del(temp1, padding);
     int** temp2 = matrix_addition(a,b,padding);
-    int** p2 = strassen(temp2, h, padding, 1);
+    int** p2 = strassen(temp2, h, padding, n0);
     matrix_del(temp2, padding);
     int** temp3 = matrix_addition(c,d,padding);
-    int** p3 = strassen(temp3, e, padding, 1);
+    int** p3 = strassen(temp3, e, padding, n0);
     matrix_del(temp3, padding);
     int** temp4 = matrix_subtraction(g,e,padding);
-    int** p4 = strassen(d, temp4, padding, 1);
+    int** p4 = strassen(d, temp4, padding, n0);
     matrix_del(temp4, padding);
     int** temp5 = matrix_addition(a,d,padding);
     int** temp6 = matrix_addition(e,h,padding);
-    int** p5 = strassen(temp5, temp6, padding, 1);
+    int** p5 = strassen(temp5, temp6, padding, n0);
     matrix_del(temp5, padding);
     matrix_del(temp6, padding);
     int** temp7 = matrix_subtraction(b,d,padding);
     int** temp8 = matrix_addition(g,h,padding);
-    int** p6 = strassen(temp7, temp8, padding, 1);
+    int** p6 = strassen(temp7, temp8, padding, n0);
     matrix_del(temp7, padding);
     matrix_del(temp8, padding);
     int** temp9 = matrix_subtraction(c,a,padding);
     int** temp10 = matrix_addition(e,f,padding);
-    int** p7 = strassen(temp9, temp10, padding, 1);
+    int** p7 = strassen(temp9, temp10, padding, n0);
     matrix_del(temp9, padding);
     matrix_del(temp10, padding);
 
@@ -200,7 +200,7 @@ int** graph_generator(int n, float p) {
 }
 
 int triangle_counter(int n, int** graph) {
-    int** result = strassen(graph, strassen(graph, graph, n, 1), n, 1);
+    int** result = strassen(graph, strassen(graph, graph, n, 32), n, 32);
     int count = 0;
     for (int i = 0; i < n; i++) {
         count += result[i][i];
@@ -274,22 +274,49 @@ int main(int _argc, char *argv[]) {
         }
 
         // print matrices
-        print_matrix(matrix1, 1, N);
-        print_matrix(matrix2, 2, N);
-        int** product1 = standard(matrix1, matrix2, padding); // Commented out because the autograder does not do anything standard
-        print_matrix(product1, 3, N);
-        int** product2 = strassen(matrix1, matrix2, padding, 1);
-        print_matrix(product2, 4, N);
+        // print_matrix(matrix1, 1, N);
+        // print_matrix(matrix2, 2, N);
+        // int** product1 = standard(matrix1, matrix2, padding); // Commented out because the autograder does not do anything standard
+        // print_matrix(product1, 3, N);
+        // int** product2 = strassen(matrix1, matrix2, padding, 1);
+        // print_matrix(product2, 4, N);
 
         // for (int i = 0; i < N; i++) {
         //     printf("%i\n",product2[i][i]);
         // }
 
+        int numberOfBaseCases = 46;
+        float* time = new float[numberOfBaseCases];
+        int crossover;
+
+        for (int i = 0; i < numberOfBaseCases; i++) {
+            crossover = 55 + i; 
+
+            auto start = std::chrono::high_resolution_clock::now();
+            int** product2 = strassen(matrix1, matrix2, padding, crossover);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+
+            time[i] = duration.count() * 1e-9;
+
+        }
+
+        float min = 100;
+        int indexOfMin = 0;
+        for (int i = 0; i < numberOfBaseCases; i++) {
+            printf("%3f, ", time[i]);
+            if (time[i] < min) {
+                min = time[i];
+                indexOfMin = i;
+            }
+        }
+        printf("The minimum index is %d, corresponding to %3f", indexOfMin, time[indexOfMin]);
+
         // delete matrices
         matrix_del(matrix1, padding);
         matrix_del(matrix2, padding);
-        matrix_del(product1, padding);
-        matrix_del(product2, padding);
+        // matrix_del(product1, padding);
+        // matrix_del(product2, padding);
         return 0;
     } else {
     // part 3
