@@ -40,27 +40,21 @@ int** standard(int** A, int** B, int n) {
 }
 
 int** matrix_addition(int** A, int** B, size_t n) {
-    int** sum = new int*[n];
-    for(size_t i = 0; i < n; i++)
-        sum[i] = new int[n];
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            sum[i][j] = A[i][j] + B[i][j];
+            A[i][j] = A[i][j] + B[i][j];
         }
     }
-    return sum;
+    return A;
 }
 
 int** matrix_subtraction(int** A, int** B, size_t n) {
-    int** difference = new int*[n];
-    for(size_t i = 0; i < n; i++)
-        difference[i] = new int[n];    
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            difference[i][j] = A[i][j] - B[i][j];
+            A[i][j] = A[i][j] - B[i][j];
         }
     }
-    return difference;
+    return A;
 }
 
 int** strassen(int** A, int** B, int n, int n0) {
@@ -75,85 +69,114 @@ int** strassen(int** A, int** B, int n, int n0) {
     if (ndiv_2 % 2 && ndiv_2 != 1) {
         padding += 1;
     }
-    int** a = new int*[padding];            // Creating the different spliced arrays 
-    int** b = new int*[padding];
-    int** c = new int*[padding];
-    int** d = new int*[padding];
-    int** e = new int*[padding];
-    int** f = new int*[padding];
-    int** g = new int*[padding];
-    int** h = new int*[padding];
-    for (size_t i = 0; i < padding; i++) { // Dynamically allocate memory for array of integers with ndiv_2 elements 
-        a[i] = new int[padding];          // for each spliced array
-        b[i] = new int[padding];
-        c[i] = new int[padding];
-        d[i] = new int[padding];
-        e[i] = new int[padding];
-        f[i] = new int[padding];
-        g[i] = new int[padding];
-        h[i] = new int[padding];
-    }
+
+    int** m1 = new int*[padding];
+    int** m2 = new int*[padding];
+    int** m3 = new int*[padding];
     for (size_t i = 0; i < padding; i++) {
+        m1[i] = new int[padding];
+        m2[i] = new int[padding];
+        m3[i] = new int[padding];
+    }
+    if (padding != ndiv_2) {
+        for (size_t i = 0; i < padding; i++) {
+                m1[i][padding-1] = 0;
+                m2[i][padding-1]= 0;
+                m3[i][padding-1] = 0;
+        }
         for (size_t j = 0; j < padding; j++) {
-            if (i < ndiv_2 && j < ndiv_2) {
-                a[i][j] = A[i][j];
-                e[i][j] = B[i][j];
-                b[i][j] = A[i][j+ndiv_2];
-                f[i][j] = B[i][j+ndiv_2];
-                c[i][j] = A[i+ndiv_2][j];
-                g[i][j] = B[i+ndiv_2][j];
-                d[i][j] = A[i+ndiv_2][j+ndiv_2];
-                h[i][j] = B[i+ndiv_2][j+ndiv_2];
-            }
-            else {
-                a[i][j] = 0;
-                e[i][j] = 0;
-                b[i][j] = 0;
-                f[i][j] = 0;
-                c[i][j] = 0;
-                g[i][j] = 0;
-                d[i][j] = 0;
-                h[i][j] = 0;
-            }
+                m1[padding-1][j] = 0;
+                m2[padding-1][j]= 0;
+                m3[padding-1][j] = 0;
         }
     }
 
-    int** temp1 = matrix_subtraction(f,h,padding);
-    int** p1 = strassen(a, temp1, padding, 1);
-    matrix_del(temp1, padding);
-    int** temp2 = matrix_addition(a,b,padding);
-    int** p2 = strassen(temp2, h, padding, 1);
-    matrix_del(temp2, padding);
-    int** temp3 = matrix_addition(c,d,padding);
-    int** p3 = strassen(temp3, e, padding, 1);
-    matrix_del(temp3, padding);
-    int** temp4 = matrix_subtraction(g,e,padding);
-    int** p4 = strassen(d, temp4, padding, 1);
-    matrix_del(temp4, padding);
-    int** temp5 = matrix_addition(a,d,padding);
-    int** temp6 = matrix_addition(e,h,padding);
-    int** p5 = strassen(temp5, temp6, padding, 1);
-    matrix_del(temp5, padding);
-    matrix_del(temp6, padding);
-    int** temp7 = matrix_subtraction(b,d,padding);
-    int** temp8 = matrix_addition(g,h,padding);
-    int** p6 = strassen(temp7, temp8, padding, 1);
-    matrix_del(temp7, padding);
-    matrix_del(temp8, padding);
-    int** temp9 = matrix_subtraction(c,a,padding);
-    int** temp10 = matrix_addition(e,f,padding);
-    int** p7 = strassen(temp9, temp10, padding, 1);
-    matrix_del(temp9, padding);
-    matrix_del(temp10, padding);
+    // compute a and f 
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
+        for (size_t j = 0; j < ndiv_2; j++) { // correct values 
+            m3[i][j] = A[i][j];
+            m1[i][j] = B[i][j+ndiv_2];
+        }
+    }
+    // compute h
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m2[i][j] = B[i+ndiv_2][j+ndiv_2];
+        }
+    }
+    int** p1 = strassen(m3, matrix_subtraction(m1, m2, padding), padding, n0);
 
-    matrix_del(a, padding);
-    matrix_del(b, padding);
-    matrix_del(c, padding);
-    matrix_del(d, padding);
-    matrix_del(e, padding);
-    matrix_del(f, padding);
-    matrix_del(g, padding);
-    matrix_del(h, padding);
+    // compute b
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m1[i][j] = A[i][j+ndiv_2];
+        }
+    }
+    int** p2 = strassen(matrix_addition(m3, m1, padding), m2, padding, n0);
+
+    // compute d and g
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m3[i][j] = A[i+ndiv_2][j+ndiv_2]; // m3 is now d
+        }
+    }
+    m1 = matrix_subtraction(m1, m3, ndiv_2); // m1 is now (b-d)
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m3[i][j] = B[i+ndiv_2][j];      // m3 is now g
+        }
+    }
+    int** p6 = strassen(m1, matrix_addition(m3, m2, padding), padding, n0);
+
+    // compute a, e, and d
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
+        for (size_t j = 0; j < ndiv_2; j++) { // correct values 
+            m3[i][j] = A[i][j];
+            m1[i][j] = B[i][j];
+        }
+    }
+    m2 = matrix_addition(m2, m1, ndiv_2);
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m1[i][j] = A[i+ndiv_2][j+ndiv_2];
+        }
+    }
+    int** p5 = strassen(matrix_addition(m3, m1, padding), m2, padding, n0);
+
+    // compute e and g
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
+        for (size_t j = 0; j < ndiv_2; j++) { // correct values 
+            m2[i][j] = B[i][j];
+        }
+    }
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m3[i][j] = B[i+ndiv_2][j];
+        }
+    }
+    int** p4 = strassen(m1, matrix_subtraction(m3, m2, padding), padding, n0);
+
+    // compute c
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m3[i][j] = A[i+ndiv_2][j];
+        }
+    }  
+    int** p3 = strassen(matrix_addition(m1, m3, padding), m2, padding, n0); // looks good
+
+    // compute a and f
+    for (size_t i = 0; i < ndiv_2; i++) {   // The following for loops assign the spliced arrays to the 
+        for (size_t j = 0; j < ndiv_2; j++) { // correct values 
+            m1[i][j] = A[i][j];
+        }
+    }
+    m3 = matrix_subtraction(m3, m1, ndiv_2);
+    for (size_t i = 0; i < ndiv_2; i++) {
+        for (size_t j = 0; j < ndiv_2; j++) {
+            m1[i][j] = B[i][j+ndiv_2]; 
+        }
+    }
+    int** p7 = strassen(m3, matrix_addition(m1, m2, padding), padding, n0);
     
     int** C = new int*[n];
     for(size_t i = 0; i < n; i++)
@@ -168,6 +191,9 @@ int** strassen(int** A, int** B, int n, int n0) {
     }
 
     // delete intermediate matrices
+    matrix_del(m1, padding);
+    matrix_del(m2, padding);
+    matrix_del(m3, padding);
     matrix_del(p1, padding);
     matrix_del(p2, padding);
     matrix_del(p3, padding);
