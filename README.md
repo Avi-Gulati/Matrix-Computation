@@ -1,0 +1,1 @@
+Since Strassen’s algorithm is a recursive algorithm, at some point in the recursion, once the matrices are small enough, we conventional matrix multiplication will be faster. What is this crossover point? This is what this repo examines. The report file contains our conclusions. 
